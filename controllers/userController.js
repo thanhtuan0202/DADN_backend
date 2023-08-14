@@ -35,7 +35,6 @@ export const userLogout = async (req, res, next) =>{
     }).catch((error) => {
         res.status(401).send({
             ...error.message,
-
             message: 'error',
         })
     });
@@ -43,6 +42,7 @@ export const userLogout = async (req, res, next) =>{
 
 export const userSignup = async (req,res,next) => {
     const {email, password, name, photoUrl, phoneNumber} = req.body;
+    const auth = getAuth();
     await createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
             const user = userCredential.user;
@@ -51,7 +51,9 @@ export const userSignup = async (req,res,next) => {
         })
         .catch((error) => {
             const errorCode = error.code;
-            const errorMessage = error.message;
-            // ..
+            res.status(errorCode).send({
+                ...error.message,
+                message: 'error',
+            })
         });
 }

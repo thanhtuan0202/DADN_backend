@@ -1,9 +1,6 @@
 import mqtt from "mqtt";
-import Notifications from "../models/dataModel.js";
-
-
 const realtimeUpdate = (io) => {
-    let feed_list = ['dadn.temperature','dadn.led','dadn.fan','dadn.humidity','dadn.anti-theft','dadn.detection']
+    let feed_list = ['dadn.temperature', 'dadn.led', 'dadn.fan', 'dadn.humidity', 'dadn.anti-theft', 'dadn.detection']
     const username = `${process.env.ADAFRUIT_USERNAME}`;
     const key = `${process.env.ADAFRUIT_KEY}`;
     const host = "mqtt://io.adafruit.com";
