@@ -25,7 +25,7 @@ export const getLastTemp = async (req, res) => {
       });
     })
     .catch((error) => {
-      res.status(200).json(error);
+      res.status(400).json(error);
     });
 };
 export const getDayTemperature = async (startDate, endDate) => {
@@ -41,9 +41,35 @@ export const getDayTemperature = async (startDate, endDate) => {
       return data;
     })
     .catch((error) => {
-      res.status(200).json(error);
+      return error;
     });
 };
+const findAvgWithTime = (start, data) => {
+    let startDay = start.getDate();
+    let arr = new Array(7).fill(0);
+    let count = new Array(7).fill(0);
+    data.data.map((item)=>{
+        let newDate = new Date(item[0]);
+        arr[newDate.getDate() - startDay] = arr[newDate.getDate() - startDay] + Number(item[1]);
+        count[newDate.getDate() - startDay] = count[newDate.getDate() - startDay] +1;
+    });
+    let result = [];
+    arr.map(((item,idx) => {
+        if(item !== 0){
+            arr[idx] = item / count[idx]
+        }
+        result.push({
+            time: new Date(
+                start.getFullYear(),
+                start.getMonth(),
+                start.getDate() + idx + 1
+            ),
+            data: arr[idx]
+        })
+    }));
+    return result;
+}
+
 export const getTemperature = async (req, res) => {
   //console.log(req.body);
   const { type } = req.body;
@@ -62,7 +88,7 @@ export const getTemperature = async (req, res) => {
         });
       })
       .catch((error) => {
-        res.status(200).json(error);
+        res.status(400).json(error);
       });
   } else if (type === "day") {
     let date = new Date();
@@ -79,28 +105,14 @@ export const getTemperature = async (req, res) => {
         },
       })
       .then(({ data }) => {
-        let data_res = data.data;
-        let start_day = date.getDate() - 6;
-        let arr = new Array(7).fill(0);
-        let count = new Array(7).fill(0)
-        data_res.map((item) => {
-            let newdate = new Date(item[0]);
-            arr[newdate.getUTCDate() - start_day] = arr[newdate.getUTCDate() - start_day] + Number(item[1]);
-            count[newdate.getUTCDate() - start_day] = count[newdate.getUTCDate() - start_day] +1;
-        })
-        arr.map(((item,idx) => {
-            if(item != 0){
-                arr[idx] = item / count[idx]
-            }
-        }))
         res.status(200).json({
-            data: arr,
+          data: findAvgWithTime(start,data),
           feed_key: "temperature",
           message: "successful",
         });
       })
       .catch((error) => {
-        res.status(200).json(error);
+        res.status(400).json(error);
       });
   }
 };
@@ -116,31 +128,31 @@ export const getLastHumidity = async (req, res) => {
         });
       })
       .catch((error) => {
-        res.status(200).json(error);
+        res.status(400).json(error);
       });
 };
-export const getDayHumidity = async (startDate, endDate) => {
-  adaRequest
-      .get(`/feeds/${feed_list.humidity}/data/last`, {
-        params: {
-          start_time: startDate,
-          end_time: endDate,
-        },
-      })
-      .then(({ data }) => {
-        //console.log(data.data);
-        return data;
-      })
-      .catch((error) => {
-        res.status(200).json(error);
-      });
-};
+// export const getDayHumidity = async (startDate, endDate) => {
+//   adaRequest
+//       .get(`/feeds/${feed_list.humidity}/data/last`, {
+//         params: {
+//           start_time: startDate,
+//           end_time: endDate,
+//         },
+//       })
+//       .then(({ data }) => {
+//         //console.log(data.data);
+//         return data;
+//       })
+//       .catch((error) => {
+//         res.status(400).json(error);
+//       });
+// };
 export const getHumidity = async (req, res) => {
   //console.log(req.body);
   const { type } = req.body;
   if (type === "hour") {
     adaRequest
-        .get(`/feeds/${feed_list.humidity}/data/last`, {
+        .get(`/feeds/${feed_list.humidity}/data/chart`, {
           params: {
             hours: 24,
           },
@@ -148,8 +160,9 @@ export const getHumidity = async (req, res) => {
         .then(({ data }) => {
           //console.log(data);
           res.status(200).json({
-            ...data,
+            feed_key: "humidity",
             message: "successful",
+              data: data.data
           });
         })
         .catch((error) => {
@@ -163,35 +176,22 @@ export const getHumidity = async (req, res) => {
         date.getDate() - 6
     );
     adaRequest
-        .get(`/feeds/${feed_list.humidity}/data/last`, {
+        .get(`/feeds/${feed_list.humidity}/data/chart`, {
           params: {
             start_time: start.toISOString(),
             end_time: date.toISOString(),
           },
         })
         .then(({ data }) => {
-          let data_res = data.data;
-          let start_day = date.getDate() - 6;
-          let arr = new Array(7).fill(0);
-          let count = new Array(7).fill(0)
-          data_res.map((item) => {
-            let newdate = new Date(item[0]);
-            arr[newdate.getUTCDate() - start_day] = arr[newdate.getUTCDate() - start_day] + Number(item[1]);
-            count[newdate.getUTCDate() - start_day] = count[newdate.getUTCDate() - start_day] +1;
-          })
-          arr.map(((item,idx) => {
-            if(item != 0){
-              arr[idx] = item / count[idx]
-            }
-          }))
+          let arr = findAvgWithTime(start, data) ;
           res.status(200).json({
-            data: arr,
+            data: findAvgWithTime(start, data),
             feed_key: "humidity",
             message: "successful",
           });
         })
         .catch((error) => {
-          res.status(200).json(error);
+          res.status(400).json(error);
         });
   }
 };
@@ -208,7 +208,7 @@ export const getLastLed = async (req, res) => {
       });
     })
     .catch((error) => {
-      res.status(200).json(error);
+      res.status(400).json(error);
     });
 };
 
@@ -243,7 +243,7 @@ export const getLastFan = async (req, res) => {
       });
     })
     .catch((error) => {
-      res.status(200).json(error);
+      res.status(400).json(error);
     });
 };
 
@@ -283,7 +283,9 @@ export const getLastAntiTheft = async (req, res, next) => {
             });
     }
     catch (err){
-        throw err;
+        res.status(err.status).json({
+            message: err.message,
+        })
     }
 }
 export const setAntiTheft = async (req, res, next) => {
@@ -306,7 +308,9 @@ export const setAntiTheft = async (req, res, next) => {
         }
     }
     catch(err){
-        throw err;
+        res.status(err.status).json({
+            message: err.message,
+        })
     }
 }
 export const getNotification = async(req,res,next) => {
@@ -339,6 +343,8 @@ export const getNotification = async(req,res,next) => {
         });
     }
     catch(err){
-        throw err;
+        res.status(402).send({
+            message: err.message,
+        })
     }
 }

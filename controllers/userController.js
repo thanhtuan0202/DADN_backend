@@ -1,8 +1,8 @@
 import Users from '../models/userModel.js';
-import { getAuth, signInWithEmailAndPassword,signOut,createUserWithEmailAndPassword } from "firebase/auth";
+import {getAuth, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword} from "firebase/auth";
 import {firebaseDb} from "../config/firebase.js";
 
-export const userLogin = async (req, res,next) =>{
+export const userLogin = async (req, res, next) => {
 
     const {email, password} = req.body;
     console.log("user login")
@@ -20,13 +20,13 @@ export const userLogin = async (req, res,next) =>{
             // ...
         })
         .catch((error) => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            console.error('Error:', errorCode, errorMessage)
+            res.status(401).send({
+                message: error.message,
+            })
         });
 }
 
-export const userLogout = async (req, res, next) =>{
+export const userLogout = async (req, res, next) => {
     const auth = getAuth();
     await signOut(auth).then(() => {
         res.status(200).send({
@@ -34,26 +34,27 @@ export const userLogout = async (req, res, next) =>{
         })
     }).catch((error) => {
         res.status(401).send({
-            ...error.message,
-            message: 'error',
+            message: error.message,
         })
     });
 }
 
-export const userSignup = async (req,res,next) => {
-    const {email, password, name, photoUrl, phoneNumber} = req.body;
+export const userSignup = async (req, res, next) => {
+    const {email, password, name, photoURL, phoneNumber} = req.body;
     const auth = getAuth();
     await createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
             const user = userCredential.user;
-            const newUser = new User(user.uid,email,name,photoUrl, phoneNumber);
+            const newUser = new Users("12374asd", email, name, photoURL, phoneNumber);
             newUser.save();
+            res.status(200).send({
+                message: 'Sign up successfully',
+            })
         })
         .catch((error) => {
             const errorCode = error.code;
-            res.status(errorCode).send({
-                ...error.message,
-                message: 'error',
+            res.status(401).send({
+                message: error.message,
             })
         });
 }

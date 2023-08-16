@@ -5,8 +5,8 @@ const router = express.Router();
 //get last feed data
 router.get("/lasttemperature", dataController.getLastTemp);
 router.get("/gettemperature", dataController.getTemperature);
-router.get("/lasthumidity", dataController.getLastTemp);
-router.get("/gethumidity", dataController.getTemperature);
+router.get("/lasthumidity", dataController.getLastHumidity);
+router.get("/gethumidity", dataController.getHumidity);
 router.get("/lastled", dataController.getLastLed);
 router.get("/lastfan", dataController.getLastFan);
 router.get("/lastanti-theft", dataController.getLastAntiTheft)
