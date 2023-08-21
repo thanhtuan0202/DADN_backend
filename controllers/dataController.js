@@ -214,7 +214,7 @@ export const getLastLed = async (req, res) => {
 
 export const setLed = async (req, res, next) => {
   const { value } = req.body;
-  if (!value) {
+  if (value == null || value === undefined) {
     res.status(400);
     return next(new Error("Value is not sent!"));
   } else {
@@ -249,13 +249,13 @@ export const getLastFan = async (req, res) => {
 
 export const setFan = async (req, res, next) => {
   const { value } = req.body;
-  if (!value) {
+  if (value == null || value === undefined) {
     res.status(400);
     return next(new Error("Value is not sent!"));
   } else {
     publishData(feed_list.fan, value, (result) => {
       if (result) {
-        res.status(201).json({
+        res.status(200).json({
           message: "Set data successful",
         });
       } else {
@@ -291,7 +291,7 @@ export const getLastAntiTheft = async (req, res, next) => {
 export const setAntiTheft = async (req, res, next) => {
     const {value} = req.body;
     try {
-        if (!value) {
+        if (value == null || value === undefined) {
             res.status(400);
             return next(new Error("Value is not sent!"));
         } else {
@@ -314,7 +314,6 @@ export const setAntiTheft = async (req, res, next) => {
     }
 }
 export const getNotification = async(req,res,next) => {
-    const {limit, api_key } = req.body;
     const noti = ref(database,"notifications")
     try{
         const notifications = [];
