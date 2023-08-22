@@ -72,7 +72,7 @@ const findAvgWithTime = (start, data) => {
 
 export const getTemperature = async (req, res) => {
   //console.log(req.body);
-  const { type } = req.body;
+  const type = req.query['type'];
   if (type === "hour") {
     adaRequest
       .get(`/feeds/${feed_list.temperature}/data/chart`, {
@@ -149,7 +149,7 @@ export const getLastHumidity = async (req, res) => {
 // };
 export const getHumidity = async (req, res) => {
   //console.log(req.body);
-  const { type } = req.body;
+  const type = req.query['type'];
   if (type === "hour") {
     adaRequest
         .get(`/feeds/${feed_list.humidity}/data/chart`, {

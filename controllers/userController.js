@@ -5,11 +5,9 @@ import {
   signOut,
   createUserWithEmailAndPassword,
 } from "firebase/auth";
-import { firebaseDb } from "../config/firebase.js";
 
 export const userLogin = async (req, res, next) => {
   const { email, password } = req.body;
-
   const auth = getAuth();
   await signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
@@ -17,16 +15,15 @@ export const userLogin = async (req, res, next) => {
       const user = userCredential.user;
       Users.getById(user.uid).then((newuser) => {
         res.status(200).send({
-            ...JSON.parse(newuser.toString()),
+          ...JSON.parse(newuser.toString()),
           accessToken: user.accessToken,
           message: "success",
         });
       });
     })
     .catch((error) => {
-      res.status(401).send({
-        message: error.message,
-      });
+        res.status(400);
+        return next(new Error("Invalid email or password"));
     });
 };
 
@@ -47,6 +44,10 @@ export const userLogout = async (req, res, next) => {
 
 export const userSignup = async (req, res, next) => {
   const { email, password, name, photoURL, phoneNumber } = req.body;
+  if (!email || !password || !name || !photoURL || !phoneNumber) {
+    res.status(400);
+    return next(new Error("All fields must be fill"));
+  }
   const auth = getAuth();
   await createUserWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
@@ -58,9 +59,7 @@ export const userSignup = async (req, res, next) => {
       });
     })
     .catch((error) => {
-      const errorCode = error.code;
-      res.status(401).send({
-        message: error.message,
-      });
+      res.status(400);
+      return next(new Error("Email has already used!"));
     });
 };
