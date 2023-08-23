@@ -314,6 +314,7 @@ export const setAntiTheft = async (req, res, next) => {
     }
 }
 export const getNotification = async(req,res,next) => {
+    let limit = req.query['limit'] ? req.query['limit'] : 24;
     const noti = ref(database,"notifications")
     try{
         const notifications = [];
@@ -328,7 +329,7 @@ export const getNotification = async(req,res,next) => {
                 const notiArray = Object.keys(data).map((key) => ({ postId: key, ...data[key] }));
                 notifications.sort((a, b) => a.createAt - b.createAt);
                 res.status(200).json({
-                    notifications,
+                    notifications: notifications.slice(-limit),
                     message: "success"
                 })
             } else {
