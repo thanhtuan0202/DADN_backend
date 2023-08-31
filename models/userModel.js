@@ -1,4 +1,3 @@
-
 import { getDatabase, ref, set,get,update,remove } from "firebase/database";
 import {firebaseDb} from '../config/firebase.js';
 const database = getDatabase(firebaseDb);
