@@ -25,7 +25,7 @@ const io = new Server(server, {
 app.get('/', (req, res) => {
   res.send('Hello world! Welcome to the backend server');
 });
-realtimeupdate(io)
+// realtimeupdate(io)
 listeners(io)
 router(app);
 
